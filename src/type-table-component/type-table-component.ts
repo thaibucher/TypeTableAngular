@@ -211,9 +211,32 @@ export class TypeTableComponent {
 
   getHighlightBoxShadow(row: number | null, column: number | null): string {
     const highlights: HighlightId[] = this.getActiveHighlights(row, column);
-    const firstHighlightId = highlights[0];
+    const firstHighlightId: HighlightId | undefined = highlights[0];
 
-    return firstHighlightId ? `inset 0 0 0 2px ${this.highlightColors[firstHighlightId]}` : 'none';
+    if (!firstHighlightId) {
+      return 'none';
+    }
+
+    if (row === null || column === null || this.hasCellHighlight(row, column)) {
+      return `inset 0 0 0 4px ${this.highlightColors[firstHighlightId]}`;
+    }
+
+    const horizontalHighlightId: HighlightId | undefined =
+      this.getHorizontalHighlightIds(row)[0];
+    const verticalHighlightId: HighlightId | undefined = this.getVerticalHighlightIds(column)[0];
+    const shadows: string[] = [];
+
+    if (horizontalHighlightId) {
+      const color: string = this.highlightColors[horizontalHighlightId];
+      shadows.push(`inset 0 4px 0 0 ${color}`, `inset 0 -4px 0 0 ${color}`);
+    }
+
+    if (verticalHighlightId) {
+      const color: string = this.highlightColors[verticalHighlightId];
+      shadows.push(`inset 4px 0 0 0 ${color}`, `inset -4px 0 0 0 ${color}`);
+    }
+
+    return shadows.join(', ');
   }
 
   private getActiveHighlights(row: number | null, column: number | null): HighlightId[] {
@@ -290,6 +313,65 @@ export class TypeTableComponent {
     });
 
     return persistentIds;
+  }
+
+  private getHorizontalHighlightIds(row: number): HighlightId[] {
+    const highlightIds: HighlightId[] = [];
+    const isHovered =
+      this.hoveredRow() === row &&
+      (this.hoveredCombinedRow() === null || this.derivedColumnShown());
+
+    if (isHovered || this.persistentHighlights()[`row:${row}`]) {
+      highlightIds.push(1);
+    }
+
+    Object.values(this.externalHighlights()).forEach((command: TypeTableHighlightCommand) => {
+      const matchesRow: boolean =
+        command.direction === 'horizontal' &&
+        command.types.some((type) => this.getTypeIndex(type) === row);
+
+      if (matchesRow) {
+        highlightIds.push(this.getExternalHighlightId(command));
+      }
+    });
+
+    return [...new Set(highlightIds)].sort((first, second) => first - second);
+  }
+
+  private getVerticalHighlightIds(column: number): HighlightId[] {
+    const highlightIds: HighlightId[] = [];
+    const isHovered: boolean = this.hoveredColumn() === column;
+
+    if (isHovered || this.persistentHighlights()[`column:${column}`]) {
+      highlightIds.push(1);
+    }
+
+    Object.values(this.externalHighlights()).forEach((command: TypeTableHighlightCommand) => {
+      const matchesColumn: boolean =
+        command.direction === 'vertical' &&
+        command.types.some((type) => this.getTypeIndex(type) === column);
+
+      if (matchesColumn) {
+        highlightIds.push(this.getExternalHighlightId(command));
+      }
+    });
+
+    return [...new Set(highlightIds)].sort((first, second) => first - second);
+  }
+
+  private hasCellHighlight(row: number, column: number): boolean {
+    const storedCellHighlights: HighlightId[] = this.cellHighlights()[this.getCellKey(row, column)] ?? [];
+    const persistentKeys: string[] = Object.keys(this.persistentHighlights());
+
+    return (
+      storedCellHighlights.length > 0 ||
+      persistentKeys.some(
+        (key: string) =>
+          key === `cell:${row}:${column}` ||
+          key === `row:${row}:${column}` ||
+          (key.startsWith(`cell:${row}:`) && key.endsWith(`:${column}`)),
+      )
+    );
   }
 
   private getTypeIndex(type: TypeEntry['name']): number {

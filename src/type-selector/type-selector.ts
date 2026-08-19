@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   InputSignal,
   OutputEmitterRef,
   input,
@@ -43,10 +44,26 @@ export class TypeSelector {
   readonly lines: InputSignal<number> = input<number>(1);
   readonly maxSelections: InputSignal<number | null> = input<number | null>(null);
   readonly filterIncompatibleTypes: InputSignal<boolean> = input<boolean>(true);
+  readonly forceDisabledTypes: InputSignal<BaseTypeEntry[]> = input<BaseTypeEntry[]>([]);
   readonly selectionChange: OutputEmitterRef<BaseTypeEntry[]> = output<BaseTypeEntry[]>();
 
   readonly types: BaseTypeEntry[] = BASE_TYPES;
   readonly selectedTypes: WritableSignal<BaseTypeEntry[]> = signal<BaseTypeEntry[]>([]);
+  private readonly forceDisabledSelectionEffect = effect(() => {
+    const forceDisabledTypes: BaseTypeEntry[] = this.forceDisabledTypes();
+    const selectedTypes: BaseTypeEntry[] = this.selectedTypes();
+    const nextSelection: BaseTypeEntry[] = selectedTypes.filter(
+      (selectedType: BaseTypeEntry) =>
+        !forceDisabledTypes.some(
+          (disabledType: BaseTypeEntry) => disabledType.id === selectedType.id,
+        ),
+    );
+
+    if (nextSelection.length !== selectedTypes.length) {
+      this.selectedTypes.set(nextSelection);
+      this.selectionChange.emit(nextSelection);
+    }
+  });
   readonly gridStyle: Signal<Record<string, string>> = computed<Record<string, string>>(() => {
     const lineCount: number = this.getLineCount();
     const columnCount: number = Math.ceil(this.types.length / lineCount);
@@ -64,9 +81,40 @@ export class TypeSelector {
   isDisabled(type: BaseTypeEntry): boolean {
     return (
       !this.isSelected(type) &&
-      (this.hasReachedSelectionLimit() ||
+      (this.isForceDisabled(type) ||
+        this.hasReachedSelectionLimit() ||
         (this.filterIncompatibleTypes() && !this.canCombineWithSelectedTypes(type)))
     );
+  }
+
+  getDisabledTooltip(type: BaseTypeEntry): string | null {
+    if (!this.isDisabled(type)) {
+      return null;
+    }
+
+    if (this.isForceDisabled(type)) {
+      return 'Cannot exclude a type that is already included';
+    }
+
+    const maximumSelections: number | null = this.maxSelections();
+
+    if (this.hasReachedSelectionLimit() && maximumSelections !== null) {
+      return `Maximum of ${maximumSelections} types selected`;
+    }
+
+    if (
+      this.selectedTypes().length === 0 ||
+      !this.filterIncompatibleTypes() ||
+      this.canCombineWithSelectedTypes(type)
+    ) {
+      return null;
+    }
+
+    const selectedTypeNames: string = this.selectedTypes()
+      .map((selectedType: BaseTypeEntry) => selectedType.name.toUpperCase())
+      .join(' + ');
+
+    return `No Pokemon found with the combination ${selectedTypeNames} + ${type.name.toUpperCase()}`;
   }
 
   getButtonColor(type: BaseTypeEntry): string {
@@ -79,7 +127,7 @@ export class TypeSelector {
       (selectedType: BaseTypeEntry) => selectedType.id === type.id,
     );
 
-    if (!isSelected && this.hasReachedSelectionLimit()) {
+    if (!isSelected && (this.isForceDisabled(type) || this.hasReachedSelectionLimit())) {
       return;
     }
 
@@ -101,6 +149,12 @@ export class TypeSelector {
   private canCombineWithSelectedTypes(type: BaseTypeEntry): boolean {
     return this.selectedTypes().every((selectedType: BaseTypeEntry) =>
       POKEMON_TYPE_COMPATIBILITY[selectedType.name].has(type.name),
+    );
+  }
+
+  private isForceDisabled(type: BaseTypeEntry): boolean {
+    return this.forceDisabledTypes().some(
+      (disabledType: BaseTypeEntry) => disabledType.id === type.id,
     );
   }
 

@@ -85,6 +85,48 @@ describe('TypeSelector', () => {
     expect(component.isDisabled(BASE_TYPES[17])).toBe(true);
   });
 
+  it('should force specified types to be disabled', () => {
+    fixture.componentRef.setInput('forceDisabledTypes', [BASE_TYPES[0]]);
+
+    expect(component.isDisabled(BASE_TYPES[0])).toBe(true);
+  });
+
+  it('should unselect a type when it becomes force-disabled', async () => {
+    component.toggleType(BASE_TYPES[0]);
+    fixture.componentRef.setInput('forceDisabledTypes', [BASE_TYPES[0]]);
+    await fixture.whenStable();
+
+    expect(component.selectedTypes()).toEqual([]);
+  });
+
+  it('should describe impossible type combinations in the disabled tooltip', () => {
+    component.toggleType(BASE_TYPES.find((type) => type.name === TypeName.grass)!);
+    const incompatibleType: BaseTypeEntry = BASE_TYPES.find(
+      (type) =>
+        type.name !== TypeName.grass &&
+        !POKEMON_TYPE_COMPATIBILITY[TypeName.grass].has(type.name),
+    )!;
+
+    expect(component.getDisabledTooltip(incompatibleType)).toBe(
+      `No Pokemon found with the combination GRASS + ${incompatibleType.name.toUpperCase()}`,
+    );
+  });
+
+  it('should describe the maximum selection limit in the disabled tooltip', () => {
+    component.toggleType(BASE_TYPES[0]);
+    component.toggleType(BASE_TYPES[1]);
+
+    expect(component.getDisabledTooltip(BASE_TYPES[2])).toBe('Maximum of 2 types selected');
+  });
+
+  it('should explain force-disabled types in the tooltip', () => {
+    fixture.componentRef.setInput('forceDisabledTypes', [BASE_TYPES[0]]);
+
+    expect(component.getDisabledTooltip(BASE_TYPES[0])).toBe(
+      'Cannot exclude a type that is already included',
+    );
+  });
+
   it('should use a darker color until a type is selected', () => {
     expect(component.getButtonColor(BASE_TYPES[0])).toBe('rgb(121, 121, 86)');
 

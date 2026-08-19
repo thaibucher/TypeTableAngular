@@ -77,6 +77,7 @@
           [lines]="2"
           [maxSelections]="17"
           [filterIncompatibleTypes]="false"
+          [forceDisabledTypes]="pendingTypes()"
           (selectionChange)="updateExcludedTypes($event)"
         />
       </div>

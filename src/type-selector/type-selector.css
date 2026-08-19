@@ -9,14 +9,16 @@
   align-items: center;
   border: 2px solid transparent;
   border-radius: 0.35rem;
-  color: #ffffff;
+  color: #111827;
   cursor: pointer;
   display: flex;
   font: inherit;
   font-weight: 700;
   justify-content: center;
   min-block-size: 2.75rem;
+  overflow: hidden;
   padding: 0.5rem;
+  position: relative;
   text-transform: uppercase;
   transition: background-color 120ms ease, border-color 120ms ease, opacity 120ms ease;
 }
@@ -31,8 +33,37 @@
   opacity: 0.45;
 }
 
+.type-button:disabled::before,
+.type-button:disabled::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.type-button:disabled::before {
+  background: linear-gradient(
+    to bottom right,
+    transparent 49%,
+    currentColor 49%,
+    currentColor 51%,
+    transparent 51%
+  );
+}
+
+.type-button:disabled::after {
+  background: linear-gradient(
+    to bottom left,
+    transparent 49%,
+    currentColor 49%,
+    currentColor 51%,
+    transparent 51%
+  );
+}
+
 .type-button.is-selected {
   border-color: #111827;
+  color: #ffffff;
 }
 
 @media (max-width: 32rem) {

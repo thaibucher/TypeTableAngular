@@ -4,12 +4,13 @@
 			class="type-button"
 			[class.is-selected]="isSelected(type)"
 			[disabled]="isDisabled(type)"
+			[attr.title]="getDisabledTooltip(type)"
 			[style.background-color]="getButtonColor(type)"
 			[attr.aria-pressed]="isSelected(type)"
 			type="button"
 			(click)="toggleType(type)"
 		>
-			{{ type.name.toUpperCase() }}
+			<span class="type-label">{{ type.name.toUpperCase() }}</span>
 		</button>
 	}
 </div>

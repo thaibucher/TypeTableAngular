@@ -4,8 +4,8 @@
 }
 
 table {
-	border-collapse: separate;
-	border-spacing: 0.2rem;
+	border-collapse: collapse;
+	border-spacing: 0;
 	margin: 0 auto;
 	width: max-content;
 	min-width: 42rem;
@@ -22,8 +22,8 @@ th,
 td {
 	block-size: 2.5rem;
 	inline-size: 2.5rem;
-	border-radius: 0.25rem;
-	font-size: 1rem;
+/* 	border-radius: 0.25rem;
+ */	font-size: 1rem;
 	text-align: center;
 	text-transform: uppercase;
 	cursor: pointer;
@@ -46,8 +46,8 @@ td {
 
 .derived-column {
 	inline-size: 5rem;
-	border-radius: 0.25rem;
-}
+/* 	border-radius: 0.25rem;
+ */}
 
 .derived-column.is-hidden {
 	opacity: 0;

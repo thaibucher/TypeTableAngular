@@ -78,6 +78,26 @@ describe('TypeTableComponent', () => {
     expect(component.derivedColumnShown()).toBe(true);
   });
 
+  it('should compose horizontal and vertical highlight borders at intersections', () => {
+    component.applyExternalHighlight({
+      direction: 'horizontal',
+      slotIndex: 0,
+      types: [TypeName.fire],
+    });
+    component.applyExternalHighlight({
+      direction: 'vertical',
+      slotIndex: 1,
+      types: [TypeName.water],
+    });
+
+    const intersectionShadow: string = component.getHighlightBoxShadow(1, 2);
+
+    expect(intersectionShadow).toContain(component.highlightColors[2]);
+    expect(intersectionShadow).toContain(component.highlightColors[3]);
+    expect(intersectionShadow).toContain('inset 0 4px');
+    expect(intersectionShadow).toContain('inset 4px 0');
+  });
+
   it('should combine a hovered column with a manually highlighted column', () => {
     component.togglePersistentColumn(1);
     component.highlightColumn(2);
