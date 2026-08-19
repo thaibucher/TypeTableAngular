@@ -3,6 +3,13 @@
     <!--     <caption>
       Generation 7 type effectiveness chart
     </caption> -->
+    <colgroup>
+      <col />
+      @for (entry of currentTableData; track entry.id) {
+        <col />
+      }
+      <col class="derived-column-track" />
+    </colgroup>
     <thead>
       <tr>
         <th class="corner" scope="col"></th>
@@ -17,6 +24,14 @@
             {{ entry.abr }}
           </th>
         }
+        <th
+          class="derived-column"
+          [class.is-hidden]="highlightedColumns().length < 2"
+          scope="col"
+          [style.background]="getCombinedColumnBackground()"
+        >
+          {{ getCombinedColumnLabel() }}
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -42,6 +57,17 @@
               {{ getEffectivenessDisplay(effectiveness).displayText }}
             </td>
           }
+          <td
+            class="derived-column"
+            [class.is-hidden]="highlightedColumns().length < 2"
+            [style.background-color]="getEffectivenessDisplay(getCombinedEffectiveness(entry)).backgroundColor"
+            [style.color]="getEffectivenessDisplay(getCombinedEffectiveness(entry)).fontColor"
+            [style.box-shadow]="getHighlightBoxShadow(row, null)"
+            (mouseenter)="highlightCombinedCell(row)"
+            (click)="togglePersistentRow(row)"
+          >
+            {{ getEffectivenessDisplay(getCombinedEffectiveness(entry)).displayText }}
+          </td>
         </tr>
       }
     </tbody>

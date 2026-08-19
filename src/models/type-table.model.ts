@@ -61,7 +61,7 @@ export const TypeColor: Record<TypeName, string> = {
   [TypeName.fairy]: '#EE99AC',
 };
 
-export type EffectivenessValue = 0 | 0.5 | 1 | 2;
+export type EffectivenessValue = 0 | 0.25 | 0.5 | 1 | 2 | 4;
 export type HighlightId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface EffectivenessDisplay {
@@ -83,8 +83,10 @@ export const highlightColors: Record<HighlightId, string> = {
 export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDisplay> = {
   0: { displayText: '0', backgroundColor: '#9ca3af', fontColor: '#ffffff' },
   0.5: { displayText: '/2', backgroundColor: '#f59e0b', fontColor: '#ffffff' },
+  0.25: { displayText: '/4', backgroundColor: '#ff6d00', fontColor: '#ffffff' },
   1: { displayText: '-', backgroundColor: '#4b5563', fontColor: '#ffffff' },
   2: { displayText: 'x2', backgroundColor: '#4ade80', fontColor: '#ffffff' },
+  4: { displayText: 'x4', backgroundColor: '#00c853', fontColor: '#ffffff' },
 };
 
 export interface BaseTypeEntry {
@@ -95,7 +97,7 @@ export interface BaseTypeEntry {
 }
 
 export interface TypeEntry extends BaseTypeEntry {
-  eff: (0 | 1 | 2 | 0.5)[];
+  eff: EffectivenessValue[];
 }
 
 export const BASE_TYPES: BaseTypeEntry[] = [

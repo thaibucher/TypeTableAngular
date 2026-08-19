@@ -7,8 +7,18 @@ table {
 	border-collapse: separate;
 	border-spacing: 0.2rem;
 	margin: 0 auto;
-	min-width: 42rem;
+	width: 56.5rem;
+	min-width: 56.5rem;
+	max-width: 56.5rem;
 	table-layout: fixed;
+}
+
+col {
+	width: 2.5rem;
+}
+
+.derived-column-track {
+	width: 5rem;
 }
 
 caption {
@@ -41,5 +51,14 @@ td {
 
 .corner {
 	background: transparent;
+}
+
+.derived-column {
+	inline-size: 5rem;
+	border-radius: 0.25rem;
+}
+
+.derived-column.is-hidden {
+	visibility: hidden;
 }
 

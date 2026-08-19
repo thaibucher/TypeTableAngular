@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import {
   EffectivenessDisplay,
   EffectivenessValue,
@@ -8,6 +8,8 @@ import {
   HighlightId,
   TypeEntry,
 } from '../models/type-table.model';
+
+const MAX_COMBINED_COLUMNS = 2;
 
 @Component({
   selector: 'app-type-table-component',
@@ -21,12 +23,62 @@ export class TypeTableComponent {
   readonly hoveredColumn = signal<number | null>(null);
   readonly cellHighlights = signal<Record<string, HighlightId[]>>({});
   readonly persistentHighlights = signal<Record<string, true>>({});
+  readonly highlightedColumns = computed(() => {
+    const columns = new Set<number>();
+
+    Object.keys(this.persistentHighlights()).forEach((key) => {
+      const columnMatch = key.match(/^column:(\d+)$/);
+      const cellMatch = key.match(/^cell:\d+:(\d+)$/);
+
+      if (columnMatch) {
+        columns.add(Number(columnMatch[1]));
+      }
+
+      if (cellMatch) {
+        columns.add(Number(cellMatch[1]));
+      }
+    });
+
+    const hoveredColumn = this.hoveredColumn();
+
+    if (hoveredColumn !== null) {
+      columns.add(hoveredColumn);
+    }
+
+    return [...columns];
+  });
+  readonly combinedColumns = computed(() =>
+    this.highlightedColumns().slice(0, MAX_COMBINED_COLUMNS),
+  );
 
   readonly highlightColors = highlightColorsData;
   readonly effectivenessDisplay = effectivenessDisplayData;
 
   getEffectivenessDisplay(value: EffectivenessValue): EffectivenessDisplay {
     return this.effectivenessDisplay[value];
+  }
+
+  getCombinedEffectiveness(entry: TypeEntry): EffectivenessValue {
+    return this.combinedColumns().reduce(
+      (total, column) => total * entry.eff[column],
+      1,
+    ) as EffectivenessValue;
+  }
+
+  getCombinedColumnLabel(): string {
+    return this.combinedColumns()
+      .map((column) => this.currentTableData[column].abr)
+      .join('+');
+  }
+
+  getCombinedColumnBackground(): string {
+    const columns = this.combinedColumns();
+
+    if (columns.length < 2) {
+      return 'transparent';
+    }
+
+    return `linear-gradient(to bottom right, ${this.currentTableData[columns[0]].color}, ${this.currentTableData[columns[1]].color})`;
   }
 
   highlightCell(row: number, column: number): void {
@@ -42,6 +94,11 @@ export class TypeTableComponent {
   highlightColumn(column: number): void {
     this.hoveredRow.set(null);
     this.hoveredColumn.set(column);
+  }
+
+  highlightCombinedCell(row: number): void {
+    this.hoveredRow.set(row);
+    this.hoveredColumn.set(null);
   }
 
   clearHighlight(): void {
