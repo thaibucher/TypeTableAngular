@@ -84,7 +84,7 @@ export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDispl
   0: { displayText: '0', backgroundColor: '#9ca3af', fontColor: '#ffffff' },
   0.5: { displayText: '/2', backgroundColor: '#f59e0b', fontColor: '#ffffff' },
   0.25: { displayText: '/4', backgroundColor: '#ff6d00', fontColor: '#ffffff' },
-  1: { displayText: '-', backgroundColor: '#4b5563', fontColor: '#ffffff' },
+  1: { displayText: '', backgroundColor: '#4b5563', fontColor: '#ffffff' },
   2: { displayText: 'x2', backgroundColor: '#4ade80', fontColor: '#ffffff' },
   4: { displayText: 'x4', backgroundColor: '#00c853', fontColor: '#ffffff' },
 };

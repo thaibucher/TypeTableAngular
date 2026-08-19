@@ -3,13 +3,6 @@
     <!--     <caption>
       Generation 7 type effectiveness chart
     </caption> -->
-    <colgroup>
-      <col />
-      @for (entry of currentTableData; track entry.id) {
-        <col />
-      }
-      <col class="derived-column-track" />
-    </colgroup>
     <thead>
       <tr>
         <th class="corner" scope="col"></th>
@@ -26,9 +19,10 @@
         }
         <th
           class="derived-column"
-          [class.is-hidden]="highlightedColumns().length < 2"
+          [class.is-hidden]="!derivedColumnShown()"
           scope="col"
-          [style.background]="getCombinedColumnBackground()"
+          [style.background]="derivedColumnShown() ? getCombinedColumnBackground() : 'transparent'"
+          (mouseenter)="clearHighlight()"
         >
           {{ getCombinedColumnLabel() }}
         </th>
@@ -59,12 +53,12 @@
           }
           <td
             class="derived-column"
-            [class.is-hidden]="highlightedColumns().length < 2"
-            [style.background-color]="getEffectivenessDisplay(getCombinedEffectiveness(entry)).backgroundColor"
-            [style.color]="getEffectivenessDisplay(getCombinedEffectiveness(entry)).fontColor"
-            [style.box-shadow]="getHighlightBoxShadow(row, null)"
+            [class.is-hidden]="!derivedColumnShown()"
+            [style.background-color]="derivedColumnShown() ? getEffectivenessDisplay(getCombinedEffectiveness(entry)).backgroundColor : 'transparent'"
+            [style.color]="derivedColumnShown() ? getEffectivenessDisplay(getCombinedEffectiveness(entry)).fontColor : 'transparent'"
+            [style.box-shadow]="derivedColumnShown() ? getHighlightBoxShadow(row, null) : 'none'"
             (mouseenter)="highlightCombinedCell(row)"
-            (click)="togglePersistentRow(row)"
+            (click)="toggleCombinedRow(row)"
           >
             {{ getEffectivenessDisplay(getCombinedEffectiveness(entry)).displayText }}
           </td>

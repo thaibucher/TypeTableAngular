@@ -21,6 +21,7 @@ export class TypeTableComponent {
   currentTableData: TypeEntry[] = GEN7_TYPES;
   readonly hoveredRow = signal<number | null>(null);
   readonly hoveredColumn = signal<number | null>(null);
+  readonly hoveredCombinedRow = signal<number | null>(null);
   readonly cellHighlights = signal<Record<string, HighlightId[]>>({});
   readonly persistentHighlights = signal<Record<string, true>>({});
   readonly highlightedColumns = computed(() => {
@@ -50,6 +51,7 @@ export class TypeTableComponent {
   readonly combinedColumns = computed(() =>
     this.highlightedColumns().slice(0, MAX_COMBINED_COLUMNS),
   );
+  readonly derivedColumnShown = computed(() => this.combinedColumns().length >= 2);
 
   readonly highlightColors = highlightColorsData;
   readonly effectivenessDisplay = effectivenessDisplayData;
@@ -74,7 +76,7 @@ export class TypeTableComponent {
   getCombinedColumnBackground(): string {
     const columns = this.combinedColumns();
 
-    if (columns.length < 2) {
+    if (!this.derivedColumnShown()) {
       return 'transparent';
     }
 
@@ -82,40 +84,62 @@ export class TypeTableComponent {
   }
 
   highlightCell(row: number, column: number): void {
+    this.hoveredCombinedRow.set(null);
     this.hoveredRow.set(row);
     this.hoveredColumn.set(column);
   }
 
   highlightRow(row: number): void {
+    this.hoveredCombinedRow.set(null);
     this.hoveredRow.set(row);
     this.hoveredColumn.set(null);
   }
 
   highlightColumn(column: number): void {
+    this.hoveredCombinedRow.set(null);
     this.hoveredRow.set(null);
     this.hoveredColumn.set(column);
   }
 
   highlightCombinedCell(row: number): void {
+    if (!this.derivedColumnShown()) {
+	  this.clearHighlight();
+      return;
+    }
+
+    this.hoveredCombinedRow.set(row);
     this.hoveredRow.set(row);
     this.hoveredColumn.set(null);
   }
 
+  toggleCombinedRow(row: number): void {
+    if (!this.derivedColumnShown()) {
+      this.clearHighlight();
+      return;
+    }
+
+    this.togglePersistentRow(row);
+  }
+
   clearHighlight(): void {
+    this.hoveredCombinedRow.set(null);
     this.hoveredRow.set(null);
     this.hoveredColumn.set(null);
   }
 
   togglePersistentCell(row: number, column: number): void {
     this.togglePersistentHighlight(`cell:${row}:${column}`);
+    this.clearHighlight();
   }
 
   togglePersistentRow(row: number): void {
     this.togglePersistentHighlight(`row:${row}`);
+    this.clearHighlight();
   }
 
   togglePersistentColumn(column: number): void {
     this.togglePersistentHighlight(`column:${column}`);
+    this.clearHighlight();
   }
 
   addHighlight(row: number, column: number, highlight: HighlightId): void {
@@ -150,7 +174,8 @@ export class TypeTableComponent {
         ? this.cellHighlights()[this.getCellKey(row, column)] ?? []
         : [];
     const isHovered =
-      (row !== null && this.hoveredRow() === row) ||
+      (row !== null && this.hoveredRow() === row &&
+        (this.hoveredCombinedRow() === null || this.derivedColumnShown())) ||
       (column !== null && this.hoveredColumn() === column);
     const isPersistent = this.isPersistentlyHighlighted(row, column);
     const highlights = isHovered || isPersistent ? [1, ...storedHighlights] : storedHighlights;

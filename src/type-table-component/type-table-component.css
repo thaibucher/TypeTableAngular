@@ -7,18 +7,9 @@ table {
 	border-collapse: separate;
 	border-spacing: 0.2rem;
 	margin: 0 auto;
-	width: 56.5rem;
-	min-width: 56.5rem;
-	max-width: 56.5rem;
-	table-layout: fixed;
-}
-
-col {
-	width: 2.5rem;
-}
-
-.derived-column-track {
-	width: 5rem;
+	width: max-content;
+	min-width: 42rem;
+	table-layout: auto;
 }
 
 caption {
@@ -59,6 +50,8 @@ td {
 }
 
 .derived-column.is-hidden {
-	visibility: hidden;
+	opacity: 0;
+	pointer-events: auto;
+	cursor: default;
 }
 
