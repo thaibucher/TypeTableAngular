@@ -42,6 +42,7 @@ console.log('end compatibility', POKEMON_TYPE_COMPATIBILITY, new Date().getTime(
 export class TypeSelector {
   readonly lines: InputSignal<number> = input<number>(1);
   readonly maxSelections: InputSignal<number | null> = input<number | null>(null);
+  readonly filterIncompatibleTypes: InputSignal<boolean> = input<boolean>(true);
   readonly selectionChange: OutputEmitterRef<BaseTypeEntry[]> = output<BaseTypeEntry[]>();
 
   readonly types: BaseTypeEntry[] = BASE_TYPES;
@@ -63,7 +64,8 @@ export class TypeSelector {
   isDisabled(type: BaseTypeEntry): boolean {
     return (
       !this.isSelected(type) &&
-      (this.hasReachedSelectionLimit() || !this.canCombineWithSelectedTypes(type))
+      (this.hasReachedSelectionLimit() ||
+        (this.filterIncompatibleTypes() && !this.canCombineWithSelectedTypes(type)))
     );
   }
 

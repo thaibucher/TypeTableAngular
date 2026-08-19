@@ -75,6 +75,16 @@ describe('TypeSelector', () => {
     expect(component.isDisabled(incompatibleType)).toBe(true);
   });
 
+  it('should allow an exclude selector to select up to 17 types', () => {
+    fixture.componentRef.setInput('maxSelections', 17);
+    fixture.componentRef.setInput('filterIncompatibleTypes', false);
+
+    BASE_TYPES.slice(0, 17).forEach((type: BaseTypeEntry) => component.toggleType(type));
+
+    expect(component.selectedTypes()).toHaveLength(17);
+    expect(component.isDisabled(BASE_TYPES[17])).toBe(true);
+  });
+
   it('should use a darker color until a type is selected', () => {
     expect(component.getButtonColor(BASE_TYPES[0])).toBe('rgb(121, 121, 86)');
 

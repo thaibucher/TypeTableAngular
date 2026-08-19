@@ -166,6 +166,19 @@ describe('PokemonSelector', () => {
     ]);
   });
 
+  it('should remove Pokemon containing excluded types', () => {
+    component.openSlot(0);
+    component.updatePendingTypes([BASE_TYPES[4]]);
+    component.updateExcludedTypes([BASE_TYPES[7]]);
+
+    const filteredPokemon: typeof pokedex = component.filteredPokemon();
+
+    expect(filteredPokemon.length).toBeGreaterThan(0);
+    expect(filteredPokemon.every((pokemon) => pokemon.type.includes(TypeName.grass))).toBe(true);
+    expect(filteredPokemon.every((pokemon) => !pokemon.type.includes(TypeName.poison))).toBe(true);
+    expect(filteredPokemon.some((pokemon) => pokemon.name.english === 'Bulbasaur')).toBe(false);
+  });
+
   it('should require a selected Pokemon before confirming', () => {
     component.openSlot(0);
     component.updatePendingTypes([BASE_TYPES[0]]);

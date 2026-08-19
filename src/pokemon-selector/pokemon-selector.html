@@ -62,11 +62,24 @@
       </button>
 
       <h2 id="pokemon-selection-title">Choose Types</h2>
-      <app-type-selector
-        [lines]="2"
-        [maxSelections]="2"
-        (selectionChange)="updatePendingTypes($event)"
-      />
+      <div class="type-filter include-filter">
+        <h3>Types</h3>
+        <app-type-selector
+          [lines]="2"
+          [maxSelections]="2"
+          (selectionChange)="updatePendingTypes($event)"
+        />
+      </div>
+
+      <div class="type-filter exclude-filter">
+        <h3>Exclude Types</h3>
+        <app-type-selector
+          [lines]="2"
+          [maxSelections]="17"
+          [filterIncompatibleTypes]="false"
+          (selectionChange)="updateExcludedTypes($event)"
+        />
+      </div>
 
       <label class="pokemon-search-label" for="pokemon-search">Search Pokemon</label>
       <input
@@ -115,6 +128,7 @@
       } @else {
         <p class="no-results">No matching Pokemon</p>
       }
+      <p class="result-count">{{ filteredPokemon().length }} results</p>
 
       <button
         class="confirm-button"

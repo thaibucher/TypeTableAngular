@@ -72,19 +72,24 @@ export class PokemonSelector implements OnInit {
   readonly activeSlot: WritableSignal<number | null> = signal<number | null>(null);
   readonly activeAction: WritableSignal<ActiveAction | null> = signal<ActiveAction | null>(null);
   readonly pendingTypes: WritableSignal<BaseTypeEntry[]> = signal<BaseTypeEntry[]>([]);
+  readonly excludedTypes: WritableSignal<BaseTypeEntry[]> = signal<BaseTypeEntry[]>([]);
   readonly searchText: WritableSignal<string> = signal<string>('');
   readonly pendingPokemon: WritableSignal<Pokemon | null> = signal<Pokemon | null>(null);
   readonly filteredPokemon: Signal<Pokemon[]> = computed<Pokemon[]>(() => {
     const searchTerm: string = this.searchText().trim().toLowerCase();
     const selectedTypes: BaseTypeEntry[] = this.pendingTypes();
+    const excludedTypes: BaseTypeEntry[] = this.excludedTypes();
 
     return pokedex.filter((pokemon: Pokemon) => {
       const matchesTypes: boolean = selectedTypes.every((type: BaseTypeEntry) =>
         pokemon.type.includes(type.name),
       );
+      const matchesExcludedTypes: boolean = excludedTypes.every(
+        (type: BaseTypeEntry) => !pokemon.type.includes(type.name),
+      );
       const matchesName: boolean = pokemon.name.english.toLowerCase().includes(searchTerm);
 
-      return matchesTypes && matchesName;
+      return matchesTypes && matchesExcludedTypes && matchesName;
     });
   });
   readonly filteredPokemonRows: Signal<Pokemon[][]> = computed<Pokemon[][]>(() => {
@@ -115,6 +120,7 @@ export class PokemonSelector implements OnInit {
   openSlot(slotIndex: number): void {
     this.activeSlot.set(slotIndex);
     this.pendingTypes.set([]);
+    this.excludedTypes.set([]);
     this.searchText.set('');
     this.pendingPokemon.set(null);
   }
@@ -122,6 +128,7 @@ export class PokemonSelector implements OnInit {
   cancelSelection(): void {
     this.activeSlot.set(null);
     this.pendingTypes.set([]);
+    this.excludedTypes.set([]);
     this.searchText.set('');
     this.pendingPokemon.set(null);
   }
@@ -133,6 +140,11 @@ export class PokemonSelector implements OnInit {
 
   updatePendingTypes(types: BaseTypeEntry[]): void {
     this.pendingTypes.set(types);
+    this.clearPendingPokemonIfFilteredOut();
+  }
+
+  updateExcludedTypes(types: BaseTypeEntry[]): void {
+    this.excludedTypes.set(types);
     this.clearPendingPokemonIfFilteredOut();
   }
 
