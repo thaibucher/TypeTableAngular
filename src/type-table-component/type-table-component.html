@@ -1,0 +1,31 @@
+<div class="table-wrapper">
+  <table>
+    <caption>
+      Generation 7 type effectiveness chart
+    </caption>
+    <thead>
+      <tr>
+        <th class="corner" scope="col"></th>
+        @for (entry of currentTableData; track entry.id) {
+          <th scope="col" [style.background-color]="entry.color">
+            {{ entry.abr }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (entry of currentTableData; track entry.id) {
+        <tr>
+          <th scope="row" [style.background-color]="entry.color">
+            {{ entry.abr }}
+          </th>
+          @for (effectiveness of entry.eff; track $index) {
+            <td [style.background-color]="getEffectivenessDisplay(effectiveness).color">
+              {{ getEffectivenessDisplay(effectiveness).displayText }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

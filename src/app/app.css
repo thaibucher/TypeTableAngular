@@ -1,0 +1,49 @@
+:host {
+	display: block;
+	min-height: 100dvh;
+	color: #172033;
+	background: #f4f1ea;
+	font-family: Georgia, 'Times New Roman', serif;
+}
+
+.site-header {
+	padding: 1.5rem clamp(1rem, 4vw, 4rem);
+	border-bottom: 1px solid #d8d1c4;
+	background: #fffdf8;
+}
+
+h1 {
+	max-width: 90rem;
+	margin: 0 auto;
+	font-size: clamp(1.5rem, 3vw, 2.5rem);
+	letter-spacing: 0.02em;
+}
+
+.landing-page {
+	display: grid;
+	grid-template-columns: minmax(8rem, 1fr) minmax(0, 64rem) minmax(8rem, 1fr);
+	align-items: start;
+	gap: 1rem;
+	width: min(100%, 100rem);
+	margin: 0 auto;
+	padding: clamp(1rem, 3vw, 3rem);
+	box-sizing: border-box;
+}
+
+.side-slot {
+	min-height: 12rem;
+}
+
+.table-area {
+	min-width: 0;
+}
+
+@media (max-width: 60rem) {
+	.landing-page {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.side-slot {
+		display: none;
+	}
+}

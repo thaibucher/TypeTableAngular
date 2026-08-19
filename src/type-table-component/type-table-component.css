@@ -1,0 +1,42 @@
+.table-wrapper {
+	overflow-x: auto;
+	padding: 1rem;
+}
+
+table {
+	border-collapse: separate;
+	border-spacing: 0.2rem;
+	margin: 0 auto;
+	min-width: 42rem;
+	table-layout: fixed;
+}
+
+caption {
+	margin-bottom: 0.75rem;
+	text-align: left;
+	font-weight: 700;
+}
+
+th,
+td {
+	block-size: 2.5rem;
+	inline-size: 2.5rem;
+	border-radius: 0.25rem;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+th {
+	color: #111827;
+	font-size: 0.75rem;
+}
+
+td {
+	color: #111827;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.corner {
+	background: transparent;
+}
