@@ -61,6 +61,32 @@ export const TypeColor: Record<TypeName, string> = {
   [TypeName.fairy]: '#EE99AC',
 };
 
+export type EffectivenessValue = 0 | 0.5 | 1 | 2;
+export type HighlightId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export interface EffectivenessDisplay {
+  displayText: string;
+  backgroundColor: string;
+  fontColor: string;
+}
+
+export const highlightColors: Record<HighlightId, string> = {
+  1: '#f5f5f5',
+  2: '#60a5fa',
+  3: '#facc15',
+  4: '#fb7185',
+  5: '#c084fc',
+  6: '#34d399',
+  7: '#fb923c',
+};
+
+export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDisplay> = {
+  0: { displayText: '0', backgroundColor: '#9ca3af', fontColor: '#ffffff' },
+  0.5: { displayText: '/2', backgroundColor: '#f59e0b', fontColor: '#ffffff' },
+  1: { displayText: '-', backgroundColor: '#4b5563', fontColor: '#ffffff' },
+  2: { displayText: 'x2', backgroundColor: '#4ade80', fontColor: '#ffffff' },
+};
+
 export interface BaseTypeEntry {
   name: string;
   abr: string;

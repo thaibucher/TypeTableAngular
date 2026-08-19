@@ -1,26 +1,44 @@
 <div class="table-wrapper">
-  <table>
-    <caption>
+  <table (mouseleave)="clearHighlight()">
+    <!--     <caption>
       Generation 7 type effectiveness chart
-    </caption>
+    </caption> -->
     <thead>
       <tr>
         <th class="corner" scope="col"></th>
-        @for (entry of currentTableData; track entry.id) {
-          <th scope="col" [style.background-color]="entry.color">
+        @for (entry of currentTableData; track entry.id; let column = $index) {
+          <th
+            scope="col"
+            [style.background-color]="entry.color"
+            [style.box-shadow]="getHighlightBoxShadow(null, column)"
+            (mouseenter)="highlightColumn(column)"
+            (click)="togglePersistentColumn(column)"
+          >
             {{ entry.abr }}
           </th>
         }
       </tr>
     </thead>
     <tbody>
-      @for (entry of currentTableData; track entry.id) {
+      @for (entry of currentTableData; track entry.id; let row = $index) {
         <tr>
-          <th scope="row" [style.background-color]="entry.color">
+          <th
+            scope="row"
+            [style.background-color]="entry.color"
+            [style.box-shadow]="getHighlightBoxShadow(row, null)"
+            (mouseenter)="highlightRow(row)"
+            (click)="togglePersistentRow(row)"
+          >
             {{ entry.abr }}
           </th>
-          @for (effectiveness of entry.eff; track $index) {
-            <td [style.background-color]="getEffectivenessDisplay(effectiveness).color">
+          @for (effectiveness of entry.eff; track $index; let column = $index) {
+            <td
+              [style.background-color]="getEffectivenessDisplay(effectiveness).backgroundColor"
+              [style.color]="getEffectivenessDisplay(effectiveness).fontColor"
+              [style.box-shadow]="getHighlightBoxShadow(row, column)"
+              (mouseenter)="highlightCell(row, column)"
+              (click)="togglePersistentCell(row, column)"
+            >
               {{ getEffectivenessDisplay(effectiveness).displayText }}
             </td>
           }

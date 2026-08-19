@@ -22,21 +22,24 @@ td {
 	block-size: 2.5rem;
 	inline-size: 2.5rem;
 	border-radius: 0.25rem;
+	font-size: 1rem;
 	text-align: center;
 	text-transform: uppercase;
+	cursor: pointer;
+	user-select: none;
+	transition: box-shadow 120ms ease;
 }
 
 th {
 	color: #111827;
-	font-size: 0.75rem;
 }
 
 td {
 	color: #111827;
-	font-size: 0.8rem;
 	font-weight: 700;
 }
 
 .corner {
 	background: transparent;
 }
+
