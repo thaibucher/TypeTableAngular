@@ -63,6 +63,16 @@ export const TypeColor: Record<TypeName, string> = {
 
 export type EffectivenessValue = 0 | 0.25 | 0.5 | 1 | 2 | 4;
 export type HighlightId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type HighlightDirection = 'horizontal' | 'vertical';
+export type HighlightMode = 'individual' | 'team';
+
+export const HIGHLIGHT_MODE: HighlightMode = 'team';
+
+export interface TypeTableHighlightCommand {
+  direction: HighlightDirection;
+  slotIndex: number;
+  types: TypeName[];
+}
 
 export interface EffectivenessDisplay {
   displayText: string;
@@ -90,7 +100,7 @@ export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDispl
 };
 
 export interface BaseTypeEntry {
-  name: string;
+  name: TypeName;
   abr: string;
   id: number;
   color: string;

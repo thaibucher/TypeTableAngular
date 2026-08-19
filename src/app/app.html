@@ -3,13 +3,23 @@
 </header>
 
 <main class="landing-page">
-  <div class="side-slot left-slot"></div>
+  <aside class="side-slot left-slot" aria-label="Attack Pokemon selectors">
+    <app-pokemon-selector
+      [mode]="'attack'"
+      (pokemonSelected)="setPokemon($event, typeTable)"
+    />
+  </aside>
 
   <section class="table-area" aria-label="Type effectiveness table">
-    <app-type-table-component />
+    <app-type-table-component #typeTable />
   </section>
 
-  <div class="side-slot right-slot"></div>
+  <aside class="side-slot right-slot" aria-label="Defend Pokemon selectors">
+    <app-pokemon-selector
+      [mode]="'defend'"
+      (pokemonSelected)="setPokemon($event, typeTable)"
+    />
+  </aside>
 </main>
 
 <router-outlet />

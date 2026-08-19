@@ -1,0 +1,48 @@
+.type-grid {
+  display: grid;
+  gap: 0.5rem;
+  inline-size: min(100%, 56rem);
+  margin-inline: auto;
+}
+
+.type-button {
+  align-items: center;
+  border: 2px solid transparent;
+  border-radius: 0.35rem;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 700;
+  justify-content: center;
+  min-block-size: 2.75rem;
+  padding: 0.5rem;
+  text-transform: uppercase;
+  transition: background-color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.type-button:hover:not(:disabled),
+.type-button:focus-visible {
+  border-color: #111827;
+}
+
+.type-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.type-button.is-selected {
+  border-color: #111827;
+}
+
+@media (max-width: 32rem) {
+  .type-grid {
+    gap: 0.35rem;
+  }
+
+  .type-button {
+    font-size: 0.8rem;
+    min-inline-size: 0;
+    padding-inline: 0.25rem;
+  }
+}

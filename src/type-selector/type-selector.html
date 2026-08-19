@@ -1,0 +1,15 @@
+<div class="type-grid" [style]="gridStyle()">
+	@for (type of types; track type.id) {
+		<button
+			class="type-button"
+			[class.is-selected]="isSelected(type)"
+			[disabled]="isDisabled(type)"
+			[style.background-color]="getButtonColor(type)"
+			[attr.aria-pressed]="isSelected(type)"
+			type="button"
+			(click)="toggleType(type)"
+		>
+			{{ type.name.toUpperCase() }}
+		</button>
+	}
+</div>

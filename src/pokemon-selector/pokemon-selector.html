@@ -1,0 +1,166 @@
+<div class="slot-list">
+  @for (slotIndex of slots; track slotIndex) {
+    @if (selectedPokemon()[slotIndex]; as pokemon) {
+      <div
+        class="pokemon-slot pokemon-result"
+        [style.background]="getPokemonBorderBackground(pokemon)"
+        [attr.aria-label]="pokemon.name.english"
+      >
+        <div class="pokemon-header">
+          @if (pokemon.image?.thumbnail; as thumbnail) {
+            <img [src]="thumbnail" [alt]="pokemon.name.english" />
+          }
+          <span>{{ pokemon.name.english }}</span>
+        </div>
+
+        <div class="pokemon-actions">
+          @for (actionIndex of actionButtons; track actionIndex) {
+            <button
+              class="pokemon-action"
+              [class.has-selection]="getActionSelection(slotIndex, actionIndex) !== null"
+              type="button"
+              [style.background-color]="getActionColor(slotIndex, actionIndex)"
+              [attr.aria-label]="'Action ' + (actionIndex + 1) + ' for ' + pokemon.name.english"
+              (click)="handleActionClick(slotIndex, actionIndex)"
+            >
+              {{ getActionLabel(slotIndex, actionIndex) }}
+            </button>
+          }
+        </div>
+
+        <button
+          class="clear-slot"
+          type="button"
+          [attr.aria-label]="'Clear ' + pokemon.name.english"
+          (click)="removeSlot(slotIndex)"
+        >
+          <span aria-hidden="true">X</span>
+        </button>
+      </div>
+    } @else {
+      <button class="pokemon-slot add-slot" type="button" (click)="openSlot(slotIndex)">
+        <span aria-hidden="true">+</span>
+        <span class="visually-hidden">Choose Pokemon for slot {{ slotIndex + 1 }}</span>
+      </button>
+    }
+  }
+</div>
+
+<button class="clear-team-button" type="button" (click)="clearTeam()">Clear team</button>
+
+@if (activeSlot() !== null) {
+  <div class="modal-backdrop" role="presentation" (click)="cancelSelection()">
+    <section
+      class="selection-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pokemon-selection-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="close-button" type="button" aria-label="Cancel Pokemon selection" (click)="cancelSelection()">
+        <span aria-hidden="true">X</span>
+      </button>
+
+      <h2 id="pokemon-selection-title">Choose Types</h2>
+      <app-type-selector
+        [lines]="2"
+        [maxSelections]="2"
+        (selectionChange)="updatePendingTypes($event)"
+      />
+
+      <label class="pokemon-search-label" for="pokemon-search">Search Pokemon</label>
+      <input
+        #pokemonSearch
+        id="pokemon-search"
+        class="pokemon-search"
+        type="search"
+        [value]="searchText()"
+        (input)="updateSearchText(pokemonSearch.value)"
+      />
+
+      @if (filteredPokemonRows().length > 0) {
+        <cdk-virtual-scroll-viewport
+          class="pokemon-grid"
+          [itemSize]="78"
+          aria-label="Matching Pokemon"
+        >
+          <div
+            class="pokemon-row"
+            *cdkVirtualFor="let row of filteredPokemonRows(); trackBy: trackPokemonRow"
+          >
+            @for (pokemon of row; track pokemon.id) {
+              <div
+                class="pokemon-option"
+                [class.is-selected]="pendingPokemon()?.id === pokemon.id"
+                [style.background]="getPokemonBorderBackground(pokemon)"
+                role="button"
+                tabindex="0"
+                [attr.aria-pressed]="pendingPokemon()?.id === pokemon.id"
+                (click)="selectPokemon(pokemon)"
+                (keydown.enter)="selectPokemon(pokemon)"
+              >
+                @if (pokemon.image?.thumbnail; as thumbnail) {
+                  <img
+                    [src]="thumbnail"
+                    [alt]="pokemon.name.english"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                }
+                <span>{{ pokemon.name.english }}</span>
+              </div>
+            }
+          </div>
+        </cdk-virtual-scroll-viewport>
+      } @else {
+        <p class="no-results">No matching Pokemon</p>
+      }
+
+      <button
+        class="confirm-button"
+        type="button"
+        [disabled]="!hasSelectedPokemon()"
+        (click)="confirmSelection()"
+      >
+        Confirm
+      </button>
+    </section>
+  </div>
+}
+
+@if (activeAction() !== null) {
+  <div class="modal-backdrop" role="presentation" (click)="cancelActionSelection()">
+    <section
+      class="selection-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="action-selection-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="close-button"
+        type="button"
+        aria-label="Cancel type selection"
+        (click)="cancelActionSelection()"
+      >
+        <span aria-hidden="true">X</span>
+      </button>
+
+      <h2 id="action-selection-title">Choose Type</h2>
+      <app-type-selector
+        [lines]="2"
+        [maxSelections]="1"
+        (selectionChange)="updatePendingActionType($event)"
+      />
+
+      <button
+        class="confirm-button"
+        type="button"
+        [disabled]="pendingActionType() === null"
+        (click)="confirmActionSelection()"
+      >
+        Confirm
+      </button>
+    </section>
+  </div>
+}

@@ -1,11 +1,14 @@
-import { Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, WritableSignal } from '@angular/core';
 import {
   EffectivenessDisplay,
   EffectivenessValue,
   effectivenessDisplay as effectivenessDisplayData,
   GEN7_TYPES,
+  HIGHLIGHT_MODE,
   highlightColors as highlightColorsData,
   HighlightId,
+  HighlightMode,
+  TypeTableHighlightCommand,
   TypeEntry,
 } from '../models/type-table.model';
 
@@ -16,6 +19,7 @@ const MAX_COMBINED_COLUMNS = 2;
   imports: [],
   templateUrl: './type-table-component.html',
   styleUrl: './type-table-component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TypeTableComponent {
   currentTableData: TypeEntry[] = GEN7_TYPES;
@@ -24,7 +28,10 @@ export class TypeTableComponent {
   readonly hoveredCombinedRow = signal<number | null>(null);
   readonly cellHighlights = signal<Record<string, HighlightId[]>>({});
   readonly persistentHighlights = signal<Record<string, true>>({});
-  readonly highlightedColumns = computed(() => {
+  readonly externalHighlights: WritableSignal<Record<string, TypeTableHighlightCommand>> = signal<
+    Record<string, TypeTableHighlightCommand>
+  >({});
+  readonly manualHighlightedColumns = computed(() => {
     const columns = new Set<number>();
 
     Object.keys(this.persistentHighlights()).forEach((key) => {
@@ -40,6 +47,35 @@ export class TypeTableComponent {
       }
     });
 
+    return [...columns];
+  });
+  readonly derivedColumnCandidates = computed(() => {
+    const columns = new Set<number>(this.manualHighlightedColumns());
+    const hoveredColumn: number | null = this.hoveredColumn();
+
+    if (hoveredColumn !== null) {
+      columns.add(hoveredColumn);
+    }
+
+    return [...columns];
+  });
+  readonly highlightedColumns = computed(() => {
+    const columns = new Set<number>(this.manualHighlightedColumns());
+
+    Object.values(this.externalHighlights()).forEach((command: TypeTableHighlightCommand) => {
+      if (command.direction !== 'vertical') {
+        return;
+      }
+
+      command.types.forEach((type) => {
+        const column: number = this.getTypeIndex(type);
+
+        if (column >= 0) {
+          columns.add(column);
+        }
+      });
+    });
+
     const hoveredColumn = this.hoveredColumn();
 
     if (hoveredColumn !== null) {
@@ -49,12 +85,13 @@ export class TypeTableComponent {
     return [...columns];
   });
   readonly combinedColumns = computed(() =>
-    this.highlightedColumns().slice(0, MAX_COMBINED_COLUMNS),
+    this.derivedColumnCandidates().slice(0, MAX_COMBINED_COLUMNS),
   );
   readonly derivedColumnShown = computed(() => this.combinedColumns().length >= 2);
 
   readonly highlightColors = highlightColorsData;
   readonly effectivenessDisplay = effectivenessDisplayData;
+  readonly highlightMode: HighlightMode = HIGHLIGHT_MODE;
 
   getEffectivenessDisplay(value: EffectivenessValue): EffectivenessDisplay {
     return this.effectivenessDisplay[value];
@@ -103,7 +140,7 @@ export class TypeTableComponent {
 
   highlightCombinedCell(row: number): void {
     if (!this.derivedColumnShown()) {
-	  this.clearHighlight();
+      this.clearHighlight();
       return;
     }
 
@@ -142,6 +179,19 @@ export class TypeTableComponent {
     this.clearHighlight();
   }
 
+  applyExternalHighlight(command: TypeTableHighlightCommand): void {
+    const key: string = `${command.direction}:${command.slotIndex}`;
+
+    this.externalHighlights.update((highlights) => {
+      if (command.types.length === 0) {
+        const { [key]: removed, ...remaining } = highlights;
+        return remaining;
+      }
+
+      return { ...highlights, [key]: command };
+    });
+  }
+
   addHighlight(row: number, column: number, highlight: HighlightId): void {
     const key = this.getCellKey(row, column);
 
@@ -160,25 +210,28 @@ export class TypeTableComponent {
   }
 
   getHighlightBoxShadow(row: number | null, column: number | null): string {
-    const highlights = this.getActiveHighlights(row, column);
-    const firstHighlight = highlights[0];
+    const highlights: HighlightId[] = this.getActiveHighlights(row, column);
+    const firstHighlightId = highlights[0];
 
-    return firstHighlight
-      ? `inset 0 0 0 2px ${this.highlightColors[firstHighlight]}`
-      : 'none';
+    return firstHighlightId ? `inset 0 0 0 2px ${this.highlightColors[firstHighlightId]}` : 'none';
   }
 
   private getActiveHighlights(row: number | null, column: number | null): HighlightId[] {
     const storedHighlights =
       row !== null && column !== null
-        ? this.cellHighlights()[this.getCellKey(row, column)] ?? []
+        ? (this.cellHighlights()[this.getCellKey(row, column)] ?? [])
         : [];
     const isHovered =
-      (row !== null && this.hoveredRow() === row &&
+      (row !== null &&
+        this.hoveredRow() === row &&
         (this.hoveredCombinedRow() === null || this.derivedColumnShown())) ||
       (column !== null && this.hoveredColumn() === column);
-    const isPersistent = this.isPersistentlyHighlighted(row, column);
-    const highlights = isHovered || isPersistent ? [1, ...storedHighlights] : storedHighlights;
+    const persistentHighlights: HighlightId[] = this.getPersistentHighlightIds(row, column);
+    const highlights = [
+      ...(isHovered ? [1 as HighlightId] : []),
+      ...persistentHighlights,
+      ...storedHighlights,
+    ];
 
     return [...new Set(highlights)].sort((first, second) => first - second) as HighlightId[];
   }
@@ -194,30 +247,61 @@ export class TypeTableComponent {
     });
   }
 
-  private isPersistentlyHighlighted(row: number | null, column: number | null): boolean {
+  private getPersistentHighlightIds(row: number | null, column: number | null): HighlightId[] {
     const highlights = this.persistentHighlights();
+    const persistentIds: HighlightId[] = [];
 
     if (row === null && column !== null) {
-      return Boolean(highlights[`column:${column}`]);
+      if (highlights[`column:${column}`]) {
+        persistentIds.push(1);
+      }
+    } else if (row !== null && column === null) {
+      if (highlights[`row:${row}`]) {
+        persistentIds.push(1);
+      }
+    } else {
+      const isManualHighlight: boolean = Object.keys(highlights).some((key) => {
+        return (
+          key === `row:${row}` ||
+          key === `column:${column}` ||
+          key === `cell:${row}:${column}` ||
+          key.startsWith(`cell:${row}:`) ||
+          (key.startsWith('cell:') && key.endsWith(`:${column}`))
+        );
+      });
+
+      if (isManualHighlight) {
+        persistentIds.push(1);
+      }
     }
 
-    if (row !== null && column === null) {
-      return Boolean(highlights[`row:${row}`]);
-    }
+    Object.values(this.externalHighlights()).forEach((command: TypeTableHighlightCommand) => {
+      const typeIndex: number = command.types.findIndex((type) => this.getTypeIndex(type) === row);
+      const isHorizontalMatch: boolean =
+        command.direction === 'horizontal' && row !== null && typeIndex >= 0;
+      const isVerticalMatch: boolean =
+        command.direction === 'vertical' && column !== null && command.types.some(
+          (type) => this.getTypeIndex(type) === column,
+        );
 
-    if (row === null || column === null) {
-      return false;
-    }
-
-    return Object.keys(highlights).some((key) => {
-      return (
-        key === `row:${row}` ||
-        key === `column:${column}` ||
-        key === `cell:${row}:${column}` ||
-        key.startsWith(`cell:${row}:`) ||
-        (key.startsWith('cell:') && key.endsWith(`:${column}`))
-      );
+      if (isHorizontalMatch || isVerticalMatch) {
+        persistentIds.push(this.getExternalHighlightId(command));
+      }
     });
+
+    return persistentIds;
+  }
+
+  private getTypeIndex(type: TypeEntry['name']): number {
+    return this.currentTableData.findIndex((entry: TypeEntry) => entry.name === type);
+  }
+
+  private getExternalHighlightId(command: TypeTableHighlightCommand): HighlightId {
+    if (this.highlightMode === 'team') {
+      return command.direction === 'horizontal' ? 2 : 3;
+    }
+
+    return (command.slotIndex + 2) as HighlightId;
   }
 
   private getCellKey(row: number, column: number): string {

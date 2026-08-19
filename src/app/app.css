@@ -31,6 +31,7 @@ h1 {
 }
 
 .side-slot {
+  align-self: center;
 	min-height: 12rem;
 }
 
