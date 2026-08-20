@@ -40,7 +40,9 @@ export const TypeAbbreviation: Record<TypeName, string> = {
   [TypeName.fairy]: 'fai',
 };
 
-export const TypeColor: Record<TypeName, string> = {
+// Alternate color palette, only one is used at a time but keeping all around to swap
+// This one is just values from a previous project of mine
+export const TypeColorOld: Record<TypeName, string> = {
   [TypeName.normal]: '#A8A878',
   [TypeName.fire]: '#F08030',
   [TypeName.water]: '#6890F0',
@@ -60,6 +62,53 @@ export const TypeColor: Record<TypeName, string> = {
   [TypeName.steel]: '#B8B8D0',
   [TypeName.fairy]: '#EE99AC',
 };
+
+// Alternate color palette, only one is used at a time but keeping all around to swap
+// This comes from the text backgrounds on bulbagarden's Type page
+export const TypeColorSoft: Record<TypeName, string> = {
+  [TypeName.normal]: '#C1C2C1',
+  [TypeName.fire]: '#EF7374',
+  [TypeName.water]: '#74ACF5',
+  [TypeName.electric]: '#FCD659',
+  [TypeName.grass]: '#82C274',
+  [TypeName.ice]: '#81DFF7',
+  [TypeName.fighting]: '#FFAC59',
+  [TypeName.poison]: '#B884DD',
+  [TypeName.ground]: '#B88E6F',
+  [TypeName.flying]: '#ADD2F5',
+  [TypeName.psychic]: '#F584A8',
+  [TypeName.bug]: '#B8C26A',
+  [TypeName.rock]: '#CBC7AD',
+  [TypeName.ghost]: '#A284A2',
+  [TypeName.dragon]: '#8D98EC',
+  [TypeName.dark]: '#998B8C',
+  [TypeName.steel]: '#98C2D1',
+  [TypeName.fairy]: '#F5A2F5',
+};
+
+// Alternate color palette, only one is used at a time but keeping all around to swap
+// This one uses the text background for the symbols section on the bulbagarden Typen page
+export const TypeColor: Record<TypeName, string> = {
+  [TypeName.normal]: '#9FA19F',
+  [TypeName.fire]: '#E62829',
+  [TypeName.water]: '#2980EF',
+  [TypeName.electric]: '#FAC000',
+  [TypeName.grass]: '#3FA129',
+  [TypeName.ice]: '#3DCEF3',
+  [TypeName.fighting]: '#FF8000',
+  [TypeName.poison]: '#9141CB',
+  [TypeName.ground]: '#915121',
+  [TypeName.flying]: '#81B9EF',
+  [TypeName.psychic]: '#EF4179',
+  [TypeName.bug]: '#91A119',
+  [TypeName.rock]: '#AFA981',
+  [TypeName.ghost]: '#704170',
+  [TypeName.dragon]: '#5060E1',
+  [TypeName.dark]: '#624D4E',
+  [TypeName.steel]: '#60A1B8',
+  [TypeName.fairy]: '#EF70EF',
+};
+
 
 export type EffectivenessValue = 0 | 0.25 | 0.5 | 1 | 2 | 4;
 export type HighlightId = 1 | 2 | 3 | 4 | 5 | 6 | 7;

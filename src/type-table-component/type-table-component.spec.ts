@@ -105,4 +105,10 @@ describe('TypeTableComponent', () => {
     expect(component.combinedColumns()).toEqual([1, 2]);
     expect(component.derivedColumnShown()).toBe(true);
   });
+
+  it('should highlight a manually clicked cell', () => {
+    component.togglePersistentCell(1, 2);
+
+    expect(component.getHighlightBoxShadow(1, 2)).toContain(component.highlightColors[1]);
+  });
 });

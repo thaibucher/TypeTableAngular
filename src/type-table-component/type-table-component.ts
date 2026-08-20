@@ -321,7 +321,7 @@ export class TypeTableComponent {
       this.hoveredRow() === row &&
       (this.hoveredCombinedRow() === null || this.derivedColumnShown());
 
-    if (isHovered || this.persistentHighlights()[`row:${row}`]) {
+    if (isHovered || this.hasPersistentRowHighlight(row)) {
       highlightIds.push(1);
     }
 
@@ -342,7 +342,7 @@ export class TypeTableComponent {
     const highlightIds: HighlightId[] = [];
     const isHovered: boolean = this.hoveredColumn() === column;
 
-    if (isHovered || this.persistentHighlights()[`column:${column}`]) {
+    if (isHovered || this.hasPersistentColumnHighlight(column)) {
       highlightIds.push(1);
     }
 
@@ -371,6 +371,26 @@ export class TypeTableComponent {
           key === `row:${row}:${column}` ||
           (key.startsWith(`cell:${row}:`) && key.endsWith(`:${column}`)),
       )
+    );
+  }
+
+  private hasPersistentRowHighlight(row: number): boolean {
+    const highlights: Record<string, true> = this.persistentHighlights();
+
+    return (
+      Boolean(highlights[`row:${row}`]) ||
+      Object.keys(highlights).some(
+        (key: string) => key.startsWith(`cell:${row}:`),
+      )
+    );
+  }
+
+  private hasPersistentColumnHighlight(column: number): boolean {
+    const highlights: Record<string, true> = this.persistentHighlights();
+
+    return (
+      Boolean(highlights[`column:${column}`]) ||
+      Object.keys(highlights).some((key: string) => key.endsWith(`:${column}`) && key.startsWith('cell:'))
     );
   }
 

@@ -12,7 +12,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { Pokemon, pokedex } from '../models/pokedex.model';
-import { BASE_TYPES, BaseTypeEntry, TypeName } from '../models/type-table.model';
+import { BASE_TYPES, BaseTypeEntry, TypeColor, TypeColorSoft, TypeName } from '../models/type-table.model';
 
 const DARKEN_FACTOR: number = 0.72;
 
@@ -118,7 +118,9 @@ export class TypeSelector {
   }
 
   getButtonColor(type: BaseTypeEntry): string {
-    return this.isSelected(type) ? type.color : this.darkenColor(type.color);
+    const color: string = TypeColor[type.name];
+
+    return this.isSelected(type) ? color : this.darkenColor(color);
   }
 
   toggleType(type: BaseTypeEntry): void {

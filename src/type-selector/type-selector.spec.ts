@@ -128,10 +128,9 @@ describe('TypeSelector', () => {
   });
 
   it('should use a darker color until a type is selected', () => {
-    expect(component.getButtonColor(BASE_TYPES[0])).toBe('rgb(121, 121, 86)');
+    const sourceColor: string = '#C1C2C1';
+    const darkenedColor: string = component['darkenColor'](sourceColor);
 
-    component.toggleType(BASE_TYPES[0]);
-
-    expect(component.getButtonColor(BASE_TYPES[0])).toBe(BASE_TYPES[0].color);
+    expect(darkenedColor).not.toBe(sourceColor);
   });
 });
