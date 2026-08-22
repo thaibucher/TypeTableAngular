@@ -42,8 +42,8 @@
           </th>
           @for (effectiveness of entry.eff; track $index; let column = $index) {
             <td
-              [style.background-color]="getEffectivenessDisplay(effectiveness).backgroundColor"
-              [style.color]="getEffectivenessDisplay(effectiveness).fontColor"
+              [style.background-color]="getCellBackgroundColor(effectiveness, row, column)"
+              [style.color]="getCellTextColor(effectiveness, row, column)"
               [style.box-shadow]="getHighlightBoxShadow(row, column)"
               (mouseenter)="highlightCell(row, column)"
               (click)="togglePersistentCell(row, column)"

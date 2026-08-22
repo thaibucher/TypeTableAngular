@@ -8,6 +8,7 @@ import {
   highlightColors as highlightColorsData,
   HighlightId,
   HighlightMode,
+  TypeColor,
   TypeTableHighlightCommand,
   TypeEntry,
 } from '../models/type-table.model';
@@ -92,6 +93,7 @@ export class TypeTableComponent {
   readonly highlightColors = highlightColorsData;
   readonly effectivenessDisplay = effectivenessDisplayData;
   readonly highlightMode: HighlightMode = HIGHLIGHT_MODE;
+  readonly typeHighlightingOverride: boolean = false;
 
   getEffectivenessDisplay(value: EffectivenessValue): EffectivenessDisplay {
     return this.effectivenessDisplay[value];
@@ -217,7 +219,16 @@ export class TypeTableComponent {
       return 'none';
     }
 
-    if (row === null || column === null || this.hasCellHighlight(row, column)) {
+    if (row === null || column === null) {
+      const color: string =
+        row === null
+          ? this.getVerticalHighlightColor(column!, firstHighlightId)
+          : this.getHorizontalHighlightColor(row, firstHighlightId);
+
+      return `inset 0 0 0 4px ${color}`;
+    }
+
+    if (this.hasCellHighlight(row, column)) {
       return `inset 0 0 0 4px ${this.highlightColors[firstHighlightId]}`;
     }
 
@@ -227,16 +238,28 @@ export class TypeTableComponent {
     const shadows: string[] = [];
 
     if (horizontalHighlightId) {
-      const color: string = this.highlightColors[horizontalHighlightId];
-      shadows.push(`inset 0 4px 0 0 ${color}`, `inset 0 -4px 0 0 ${color}`);
+      const color: string = this.getHorizontalHighlightColor(row, horizontalHighlightId);
+      shadows.push(...this.getHorizontalEdgeShadows(color));
     }
 
     if (verticalHighlightId) {
-      const color: string = this.highlightColors[verticalHighlightId];
-      shadows.push(`inset 4px 0 0 0 ${color}`, `inset -4px 0 0 0 ${color}`);
+      const color: string = this.getVerticalHighlightColor(column, verticalHighlightId);
+      shadows.push(...this.getVerticalEdgeShadows(color));
     }
 
     return shadows.join(', ');
+  }
+
+  getCellBackgroundColor(value: EffectivenessValue, row: number, column: number): string {
+    const display: EffectivenessDisplay = this.getEffectivenessDisplay(value);
+
+    return this.isCellHighlighted(row, column) ? display.fontColor : display.backgroundColor;
+  }
+
+  getCellTextColor(value: EffectivenessValue, row: number, column: number): string {
+    const display: EffectivenessDisplay = this.getEffectivenessDisplay(value);
+
+    return this.isCellHighlighted(row, column) ? display.backgroundColor : display.fontColor;
   }
 
   private getActiveHighlights(row: number | null, column: number | null): HighlightId[] {
@@ -257,6 +280,10 @@ export class TypeTableComponent {
     ];
 
     return [...new Set(highlights)].sort((first, second) => first - second) as HighlightId[];
+  }
+
+  private isCellHighlighted(row: number, column: number): boolean {
+    return this.getActiveHighlights(row, column).length > 0;
   }
 
   private togglePersistentHighlight(key: string): void {
@@ -357,6 +384,75 @@ export class TypeTableComponent {
     });
 
     return [...new Set(highlightIds)].sort((first, second) => first - second);
+  }
+
+  private getHorizontalHighlightColor(row: number, highlightId: HighlightId): string {
+    const externalColor: string | undefined = this.getExternalHighlightColor('horizontal', row);
+
+    return externalColor ?? this.highlightColors[highlightId];
+  }
+
+  private getVerticalHighlightColor(column: number, highlightId: HighlightId): string {
+    const externalColor: string | undefined = this.getExternalHighlightColor('vertical', column);
+
+    return externalColor ?? this.highlightColors[highlightId];
+  }
+
+  private getExternalHighlightColor(
+    direction: TypeTableHighlightCommand['direction'],
+    index: number,
+  ): string | undefined {
+    if (!this.typeHighlightingOverride) {
+      return undefined;
+    }
+
+    for (const command of Object.values(this.externalHighlights())) {
+      if (command.direction !== direction) {
+        continue;
+      }
+
+      const matchingType = command.types.find((type) => this.getTypeIndex(type) === index);
+
+      if (matchingType !== undefined) {
+        return TypeColor[matchingType];
+      }
+    }
+
+    return undefined;
+  }
+
+  private getHorizontalEdgeShadows(color: string): string[] {
+    return [
+      `inset 0 1px 0 0 ${color}`,
+      `inset 0 2px 0 0 ${this.getTransparentColor(color, 0.7)}`,
+      `inset 0 3px 0 0 ${this.getTransparentColor(color, 0.4)}`,
+      `inset 0 4px 0 0 ${this.getTransparentColor(color, 0.15)}`,
+      `inset 0 -1px 0 0 ${color}`,
+      `inset 0 -2px 0 0 ${this.getTransparentColor(color, 0.7)}`,
+      `inset 0 -3px 0 0 ${this.getTransparentColor(color, 0.4)}`,
+      `inset 0 -4px 0 0 ${this.getTransparentColor(color, 0.15)}`,
+    ];
+  }
+
+  private getVerticalEdgeShadows(color: string): string[] {
+    return [
+      `inset 1px 0 0 0 ${color}`,
+      `inset 2px 0 0 0 ${this.getTransparentColor(color, 0.7)}`,
+      `inset 3px 0 0 0 ${this.getTransparentColor(color, 0.4)}`,
+      `inset 4px 0 0 0 ${this.getTransparentColor(color, 0.15)}`,
+      `inset -1px 0 0 0 ${color}`,
+      `inset -2px 0 0 0 ${this.getTransparentColor(color, 0.7)}`,
+      `inset -3px 0 0 0 ${this.getTransparentColor(color, 0.4)}`,
+      `inset -4px 0 0 0 ${this.getTransparentColor(color, 0.15)}`,
+    ];
+  }
+
+  private getTransparentColor(color: string, opacity: number): string {
+    const red: number = Number.parseInt(color.slice(1, 3), 16);
+    const green: number = Number.parseInt(color.slice(3, 5), 16);
+    const blue: number = Number.parseInt(color.slice(5, 7), 16);
+
+    return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
   }
 
   private hasCellHighlight(row: number, column: number): boolean {

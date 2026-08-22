@@ -140,13 +140,22 @@ export const highlightColors: Record<HighlightId, string> = {
 };
 
 export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDisplay> = {
-  0: { displayText: '0', backgroundColor: '#9ca3af', fontColor: '#000' },
-  0.5: { displayText: '/2', backgroundColor: '#f59e0b', fontColor: '#000' },
+  0: { displayText: '0', backgroundColor: '#222', fontColor: '#fff' },
+  0.5: { displayText: '/2', backgroundColor: '#222', fontColor: '#f59e0b' },
   0.25: { displayText: '/4', backgroundColor: '#ff6d00', fontColor: '#000' },
-  1: { displayText: '', backgroundColor: '#222', fontColor: '#000' },
-  2: { displayText: 'x2', backgroundColor: '#4ade80', fontColor: '#000' },
+  1: { displayText: '', backgroundColor: '#222', fontColor: '#222' },
+  2: { displayText: 'x2', backgroundColor: '#222', fontColor: '#4ade80' },
   4: { displayText: 'x4', backgroundColor: '#00c853', fontColor: '#000' },
 };
+
+/* export const effectivenessDisplay: Record<EffectivenessValue, EffectivenessDisplay> = {
+  0: { displayText: '0', backgroundColor: '#9ca3af', fontColor: '#fff' },
+  0.5: { displayText: '/2', backgroundColor: '#5c3034', fontColor: '#fff' },
+  0.25: { displayText: '/4', backgroundColor: '#ff6d00', fontColor: '#fff' },
+  1: { displayText: '', backgroundColor: '#222', fontColor: '#fff' },
+  2: { displayText: 'x2', backgroundColor: '#35443d', fontColor: '#fff' },
+  4: { displayText: 'x4', backgroundColor: '#00c853', fontColor: '#fff' },
+}; */
 
 export interface BaseTypeEntry {
   name: TypeName;

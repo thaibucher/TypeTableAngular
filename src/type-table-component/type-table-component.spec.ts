@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TypeName } from '../models/type-table.model';
+import {
+  EffectivenessDisplay,
+  EffectivenessValue,
+  TypeColor,
+  TypeName,
+} from '../models/type-table.model';
 import { TypeTableComponent } from './type-table-component';
 
 describe('TypeTableComponent', () => {
@@ -28,7 +33,7 @@ describe('TypeTableComponent', () => {
       types: [TypeName.fire],
     });
 
-    expect(component.getHighlightBoxShadow(1, null)).toContain(component.highlightColors[2]);
+    expect(component.getHighlightBoxShadow(1, null)).toContain(TypeColor[TypeName.fire]);
     expect(component.getHighlightBoxShadow(null, 1)).toBe('none');
   });
 
@@ -39,8 +44,19 @@ describe('TypeTableComponent', () => {
       types: [TypeName.water],
     });
 
-    expect(component.getHighlightBoxShadow(null, 2)).toContain(component.highlightColors[3]);
+    expect(component.getHighlightBoxShadow(null, 2)).toContain(TypeColor[TypeName.water]);
     expect(component.getHighlightBoxShadow(2, null)).toBe('none');
+  });
+
+  it('should use highlight ID colors when type highlighting is overridden off', () => {
+    (component as { typeHighlightingOverride: boolean }).typeHighlightingOverride = false;
+    component.applyExternalHighlight({
+      direction: 'horizontal',
+      slotIndex: 0,
+      types: [TypeName.fire],
+    });
+
+    expect(component.getHighlightBoxShadow(1, null)).toContain(component.highlightColors[2]);
   });
 
   it('should remove an external slot highlight when its types are empty', () => {
@@ -92,10 +108,11 @@ describe('TypeTableComponent', () => {
 
     const intersectionShadow: string = component.getHighlightBoxShadow(1, 2);
 
-    expect(intersectionShadow).toContain(component.highlightColors[2]);
-    expect(intersectionShadow).toContain(component.highlightColors[3]);
-    expect(intersectionShadow).toContain('inset 0 4px');
-    expect(intersectionShadow).toContain('inset 4px 0');
+    expect(intersectionShadow).toContain(TypeColor[TypeName.fire]);
+    expect(intersectionShadow).toContain(TypeColor[TypeName.water]);
+    expect(intersectionShadow).toContain('inset 0 2px');
+    expect(intersectionShadow).toContain('inset 2px 0');
+    expect(intersectionShadow).toContain('rgba(');
   });
 
   it('should combine a hovered column with a manually highlighted column', () => {
@@ -110,5 +127,22 @@ describe('TypeTableComponent', () => {
     component.togglePersistentCell(1, 2);
 
     expect(component.getHighlightBoxShadow(1, 2)).toContain(component.highlightColors[1]);
+  });
+
+  it('should invert data cell colors whenever the cell is highlighted', () => {
+    const value: EffectivenessValue = 0.5;
+    const display: EffectivenessDisplay = component.getEffectivenessDisplay(value);
+
+    expect(component.getCellBackgroundColor(value, 1, 2)).toBe(display.backgroundColor);
+    expect(component.getCellTextColor(value, 1, 2)).toBe(display.fontColor);
+
+    component.applyExternalHighlight({
+      direction: 'horizontal',
+      slotIndex: 0,
+      types: [TypeName.fire],
+    });
+
+    expect(component.getCellBackgroundColor(value, 1, 2)).toBe(display.fontColor);
+    expect(component.getCellTextColor(value, 1, 2)).toBe(display.backgroundColor);
   });
 });
